@@ -202,6 +202,7 @@ const brokerConfig: BrokerOptions = {
 	// Register custom REPL commands.
 	replCommands: null,
 	/*
+	
 	// Called after broker created.
 	created : (broker: ServiceBroker): void => {},
 	// Called after broker started.

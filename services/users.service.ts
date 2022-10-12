@@ -1,10 +1,12 @@
 "use strict";
-import { Context, Service, ServiceBroker, ServiceSchema } from "moleculer";
+import { Service, ServiceBroker } from "moleculer";
+import { UsersController } from "../src/users/users.controller";
 
 export default class UsersService extends Service {
 	// @ts-ignore
 	public constructor(public broker: ServiceBroker) {
 		super(broker);
+
 		this.parseServiceSchema({
 			name: "users",
 
@@ -13,35 +15,17 @@ export default class UsersService extends Service {
 			hooks: {},
 
 			actions: {
-				getUserssss: {
-					rest: "GET /users",
-
-					params: {
-						name: "string",
-					},
-
-					handler(cxt: any) {
-						broker.emit("users.created", cxt.params);
-
-						return "GET USERS!!!";
-					},
-				},
-
 				signup: {
 					rest: "POST /sign-up",
 
 					params: {
-						nameUser: "string",
+						username: "string",
+						password: { type: "string", min: 6 },
 						address: "string",
 						age: "number",
-						password: "string",
 					},
 
-					handler(cxt: any) {
-						console.log(cxt.params);
-
-						return cxt.params;
-					},
+					handler: this.signup,
 				},
 
 				signin: {
@@ -50,41 +34,34 @@ export default class UsersService extends Service {
 						username: "string",
 						password: "string",
 					},
-					handler(cxt: any) {
-						return cxt.params;
-					},
-				},
-
-				updateprofie: {
-					rest: "PUT /update-profile",
-					params: {
-						address: "string",
-						age: "number",
-						password: "string",
-					},
-					handler(cxt: any) {
-						return cxt.params;
-					},
-				},
-
-				deleteuser: {
-					rest: "DELETE /delete-user",
-					params: {
-						_id: "string",
-					},
-					handler(cxt: any) {
-						return cxt.params;
-					},
+					handler: this.signin,
 				},
 			},
 
 			methods: {},
-			/**
-			 * Loading sample data to the collection.
-			async afterConnected() {
-			 await this.adapter.collection.createIndex({ name: 1 });
-			},
-			 */
 		});
+	}
+
+	private async signin(ctx: any) {
+		const { username, password } = ctx.params;
+
+		const signin = await UsersController.signin(username, password);
+
+		return signin;
+	}
+
+	private async signup(ctx: any) {
+		const { username, password, address, age } = ctx.params;
+
+		console.log(username, password, address, age);
+
+		const created = await UsersController.signup(
+			username,
+			password,
+			address,
+			age
+		);
+
+		return created;
 	}
 }

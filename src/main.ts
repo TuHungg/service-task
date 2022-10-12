@@ -1,11 +1,6 @@
-import { Module } from "@nestjs/common";
-import { MongooseModule } from "@nestjs/mongoose";
-import { ConfigModule } from "@nestjs/config";
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "./main.module";
 
-@Module({
-	imports: [
-		ConfigModule.forRoot(),
-		MongooseModule.forRoot("mongodb://localhost:27017/neox"),
-	],
-})
-export class AppModule {}
+export async function appNest() {
+	await NestFactory.create(AppModule);
+}
