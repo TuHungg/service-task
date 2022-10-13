@@ -64,4 +64,29 @@ export class UsersHandler implements UserRepository {
 
 		return "Sign in successfully";
 	}
+
+	public async update(
+		_id: mongoose.Types.ObjectId,
+		username: string,
+		address: string,
+		age: number
+	): Promise<string> {
+		const model = await this.getUserModel();
+
+		await model.updateOne({ _id }, { username, address, age });
+
+		return `Update user have value { ${username}, ${address}, ${age} }`;
+	}
+
+	public async checkIdUser(id: string): Promise<boolean> {
+		const model = await this.getUserModel();
+
+		const checkId = await model.findById(id);
+
+		if (!checkId) {
+			return false;
+		}
+
+		return true;
+	}
 }

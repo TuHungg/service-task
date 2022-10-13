@@ -1,9 +1,8 @@
-import { AppModule } from "./../src/main.module";
 import { NestFactory } from "@nestjs/core";
 import { Service, ServiceBroker } from "moleculer";
 import ApiGateway from "moleculer-web";
+import { AppModule } from "src/main.module";
 import { appNest } from "../src/main";
-import { UsersModule } from "../src/users/users.module";
 
 export default class ApiService extends Service {
 	public constructor(broker: ServiceBroker) {
@@ -172,7 +171,7 @@ export default class ApiService extends Service {
 			},
 			created() {
 				// await appNest();
-				NestFactory.create(AppModule);
+				appNest();
 			},
 		});
 	}
