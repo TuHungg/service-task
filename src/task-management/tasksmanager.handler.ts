@@ -9,7 +9,7 @@ import {
 
 @Injectable()
 export class TasksManagementHandler implements TasksManagementRepository {
-	constructor(
+	public constructor(
 		@InjectModel(TasksManagement.name)
 		private tasksManagementModel: mongoose.Model<TasksManagement>
 	) {}
@@ -46,7 +46,7 @@ export class TasksManagementHandler implements TasksManagementRepository {
 
 		await setedTask.save();
 
-		return `Set task for user successfully`;
+		return "Set task for user successfully";
 	}
 
 	public async setTaskforUser(
@@ -58,6 +58,19 @@ export class TasksManagementHandler implements TasksManagementRepository {
 
 		await model.updateOne({ _id }, { status, taskenddate });
 
-		return `Set task sucessfully`;
+		return "Set task sucessfully";
+	}
+
+	public async getTaskListbyUserId(
+		userId: string
+	): Promise<TasksManagement[]> {
+		const model = await this.getTasksManagementModel();
+		console.log("Handler---->", userId);
+
+		const taskList = await model.find({ userId }).exec();
+
+		console.log("Handler---->", taskList);
+
+		return taskList;
 	}
 }

@@ -67,4 +67,24 @@ export class TasksHandler implements TasksRepository {
 
 		return "Delete Task successfully";
 	}
+
+	public async checkIdTask(_id: mongoose.Types.ObjectId): Promise<boolean> {
+		const model = await this.getTaskModel();
+
+		const result = await model.findById(_id);
+
+		if (!result) {
+			return false;
+		}
+
+		return true;
+	}
+
+	public async getAllTasks(): Promise<Task[]> {
+		const model = await this.getTaskModel();
+
+		const result = await model.find();
+
+		return result;
+	}
 }

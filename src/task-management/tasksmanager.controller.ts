@@ -1,12 +1,13 @@
 import { Controller } from "@nestjs/common";
 import mongoose from "mongoose";
 import { TasksManagementHandler } from "./tasksmanager.handler";
+import { TasksManagement } from "./schemas/tasksmanager.schema";
 
 @Controller()
 export class TasksManagementController {
-	static tasksManagementHandler: TasksManagementHandler;
+	public static tasksManagementHandler: TasksManagementHandler;
 
-	constructor(tasksManagementHandler: TasksManagementHandler) {
+	public constructor(tasksManagementHandler: TasksManagementHandler) {
 		TasksManagementController.tasksManagementHandler =
 			tasksManagementHandler;
 	}
@@ -32,6 +33,14 @@ export class TasksManagementController {
 			_id,
 			status,
 			taskenddate
+		);
+	}
+
+	public static getTasksListbyUserId(
+		userId: string
+	): Promise<TasksManagement[]> {
+		return TasksManagementController.tasksManagementHandler.getTaskListbyUserId(
+			userId
 		);
 	}
 }

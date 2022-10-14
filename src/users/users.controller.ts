@@ -1,12 +1,13 @@
 import { Controller } from "@nestjs/common";
+import { JwtPayload } from "jsonwebtoken";
 import mongoose from "mongoose";
 import { UsersHandler } from "./users.handler";
 
 @Controller()
 export class UsersController {
-	static usersHandler: UsersHandler;
+	public static usersHandler: UsersHandler;
 
-	constructor(usersHandler: UsersHandler) {
+	public constructor(usersHandler: UsersHandler) {
 		UsersController.usersHandler = usersHandler;
 	}
 
@@ -39,5 +40,13 @@ export class UsersController {
 
 	public static checkIdUser(id: string) {
 		return UsersController.usersHandler.checkIdUser(id);
+	}
+
+	public static verifyToken(token: string): JwtPayload | string {
+		return UsersController.usersHandler.verifyToken(token);
+	}
+
+	public static getAllUser() {
+		return UsersController.usersHandler.getAllUser();
 	}
 }

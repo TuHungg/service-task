@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { TasksManagement } from "./schemas/tasksmanager.schema";
 
 export interface TasksManagementRepository {
 	createTaskforUser(
@@ -7,7 +8,7 @@ export interface TasksManagementRepository {
 		status: string
 	): Promise<string>;
 
-	// getTaskListbyUserId(userId: string): Promise<void>;
+	getTaskListbyUserId(userId: string): Promise<TasksManagement[]>;
 
 	setTaskforUser(
 		_id: mongoose.Types.ObjectId,

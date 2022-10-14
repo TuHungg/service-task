@@ -12,25 +12,26 @@ export default class UserTaskManagementService extends Service {
 
 			settings: {},
 
-			hooks: {},
+			hooks: {
+				before: {
+					create: [this.hookcheckTaskUser],
+				},
+			},
 
 			actions: {
 				create: {
-					rest: "POST /createTaskforUser",
+					rest: "POST /settask",
 					params: {
 						taskId: { type: "string", optional: true },
 						userId: { type: "string", optional: true },
 						status: { type: "string", optional: true },
 					},
 
-					handler(ctx: any) {
-						this.createTaskforUser(ctx);
-						broker.emit("userTaskManagement.create", ctx.params);
-					},
+					handler: this.createTaskforUser,
 				},
 
 				setTasks: {
-					rest: "PUT /setTask",
+					rest: "PUT /update-task",
 					params: {
 						_id: { type: "string", optional: true },
 						status: { type: "string", optional: true },
@@ -39,12 +40,43 @@ export default class UserTaskManagementService extends Service {
 
 					handler: this.setTaskforUser,
 				},
+
+				getTaskList: {
+					rest: "POST /tasklistby-UserId",
+					params: {
+						userId: { type: "string", optional: true },
+					},
+
+					handler: this.getTasksListbyUserId,
+				},
 			},
 
 			events: {},
 
 			methods: {},
+
+			dependencies: ["nodechild"],
 		});
+	}
+
+	public async hookcheckTaskUser(ctx): Promise<void> {
+		const { taskId, userId, status } = ctx.params;
+
+		const checkUser: boolean = await this.broker.call(
+			"user.checkIdUser",
+			ctx.params
+		);
+
+		const checkTask = await this.broker.call(
+			"task.checkIdTask",
+			ctx.params
+		);
+
+		console.log(checkTask);
+
+		if (checkUser === false || checkTask === false) {
+			throw new Error("User or Task exits");
+		}
 	}
 
 	public async createTaskforUser(ctx: any) {
@@ -71,5 +103,17 @@ export default class UserTaskManagementService extends Service {
 		);
 
 		return update;
+	}
+
+	public async getTasksListbyUserId(ctx: any) {
+		const { userId } = ctx.params;
+
+		const listTask = await TasksManagementController.getTasksListbyUserId(
+			userId
+		);
+
+		console.log("listTask--------------------->", listTask);
+
+		return listTask;
 	}
 }

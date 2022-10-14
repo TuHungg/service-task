@@ -1,14 +1,16 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
+import { compare, hash } from "bcryptjs";
+import { JwtPayload, sign, verify } from "jsonwebtoken";
 import mongoose from "mongoose";
-import { hash, compare } from "bcryptjs";
-import { ConnectionMongoDb } from "../../configs/db.config";
+
+import { v4 as uuidv4 } from "uuid";
 import { User, UserSchema } from "./schemas/users.schemas";
 import { UserRepository } from "./users.repository";
 
 @Injectable()
 export class UsersHandler implements UserRepository {
-	constructor(
+	public constructor(
 		@InjectModel(User.name) private userModel: mongoose.Model<User>
 	) {}
 
@@ -37,8 +39,10 @@ export class UsersHandler implements UserRepository {
 		const model = await this.getUserModel();
 
 		const hashPassword = await hash(password, 12);
+		const userId = uuidv4();
 
 		const user = await model.create({
+			userId,
 			username,
 			password: hashPassword,
 			address,
@@ -62,7 +66,13 @@ export class UsersHandler implements UserRepository {
 			return `User ${username} of password invalid`;
 		}
 
-		return "Sign in successfully";
+		const accessToken = sign(
+			{ _id: user.userId, username, role: user.role },
+			process.env.SECRET_KEY,
+			{ algorithm: "HS256", expiresIn: "1h" }
+		);
+
+		return accessToken;
 	}
 
 	public async update(
@@ -88,5 +98,17 @@ export class UsersHandler implements UserRepository {
 		}
 
 		return true;
+	}
+
+	public async verifyToken(token: string): Promise<JwtPayload | string> {
+		const decoded = verify(token, process.env.SECRET_KEY);
+		return decoded;
+	}
+
+	public async getAllUser(): Promise<User[]> {
+		const model = await this.getUserModel();
+		const users = await model.find();
+
+		return users;
 	}
 }

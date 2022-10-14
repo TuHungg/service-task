@@ -3,7 +3,7 @@ import { Document } from "mongoose";
 
 export type TasksManagementDocument = TasksManagement & Document;
 
-@Schema()
+@Schema({ timestamps: true })
 export class TasksManagement {
 	@Prop({ type: String, required: true })
 	taskId: string;

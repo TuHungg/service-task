@@ -1,5 +1,6 @@
 "use strict";
 import { Service, ServiceBroker } from "moleculer";
+import { createtasksdto } from "src/task/dto/createtasks.dto";
 import { TasksController } from "../src/task/tasks.controller";
 
 export default class TasksService extends Service {
@@ -7,7 +8,7 @@ export default class TasksService extends Service {
 	public constructor(public broker: ServiceBroker) {
 		super(broker);
 		this.parseServiceSchema({
-			name: "tasks",
+			name: "task",
 
 			settings: {},
 
@@ -38,6 +39,20 @@ export default class TasksService extends Service {
 
 					handler: this.update,
 				},
+
+				getAll: {
+					rest: "GET /findAll",
+
+					handler: this.getAllTask,
+				},
+
+				async checkIdTask(cxt: any) {
+					const result = await this.checkTask(cxt);
+
+					console.log("check Task: ", result);
+
+					return result;
+				},
 			},
 
 			events: {},
@@ -49,7 +64,16 @@ export default class TasksService extends Service {
 			 await this.adapter.collection.createIndex({ name: 1 });
 			},
 			 */
+			dependencies: ["nodechild"],
 		});
+	}
+
+	public async checkTask(ctx: any) {
+		const { taskId } = ctx.params;
+
+		const result: boolean = await TasksController.checkIdTask(taskId);
+
+		return result;
 	}
 
 	private async create(ctx: any) {
@@ -76,5 +100,11 @@ export default class TasksService extends Service {
 		);
 
 		return updateTask;
+	}
+
+	private async getAllTask() {
+		const resulst = await TasksController.getAllTask();
+
+		return resulst;
 	}
 }

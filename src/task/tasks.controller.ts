@@ -15,9 +15,6 @@ export class TasksController {
 		context: string,
 		status: string
 	): Promise<string> {
-
-		console.log("handler", taskname, context, status);
-
 		return TasksController.tasksHandler.createTask(
 			taskname,
 			context,
@@ -41,7 +38,17 @@ export class TasksController {
 		);
 	}
 
-	public async delete(taskId: mongoose.Types.ObjectId): Promise<string> {
+	public static async delete(
+		taskId: mongoose.Types.ObjectId
+	): Promise<string> {
 		return TasksController.tasksHandler.delete(taskId);
+	}
+
+	public static async checkIdTask(taskId: mongoose.Types.ObjectId) {
+		return TasksController.tasksHandler.checkIdTask(taskId);
+	}
+
+	public static async getAllTask() {
+		return TasksController.tasksHandler.getAllTasks();
 	}
 }

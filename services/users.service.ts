@@ -1,5 +1,7 @@
 import { Service, ServiceBroker } from "moleculer";
 import { UsersController } from "../src/users/users.controller";
+import { signupdto } from "../src/users/dto/signup.dto";
+import { signindto } from "../src/users/dto/signin.dto";
 
 export default class UsersService extends Service {
 	// @ts-ignore
@@ -7,13 +9,19 @@ export default class UsersService extends Service {
 		super(broker);
 
 		this.parseServiceSchema({
-			name: "users",
+			name: "user",
 
 			settings: {},
 
 			hooks: {},
 
 			actions: {
+				getAllUser: {
+					rest: "GET /",
+
+					handler: this.getAllUser,
+				},
+
 				signup: {
 					rest: "POST /sign-up",
 
@@ -41,39 +49,30 @@ export default class UsersService extends Service {
 
 					params: {
 						_id: { type: "string", optional: true },
-
 						username: { type: "string", optional: false },
-
 						address: { type: "string", optional: false },
-
 						age: { type: "string", optional: false },
 					},
-
 					handler: this.update,
 				},
-			},
 
-			events: {
-				"userTaskManagement.create": {
-					async handler(ctx: any) {
-						// const { userId } = ctx.params;
+				checkIdUser: {
+					handler: this.getcheckIdUser,
+				},
 
-						console.log(ctx);
-
-						// const checkId = await UsersController.checkIdUser(
-						// 	userId
-						// );
-
-						return ctx.params;
-					},
+				verifyToken: {
+					handler: this.verifyToken,
 				},
 			},
 
+			events: {},
+
 			methods: {},
+			dependencies: ["nodechild"],
 		});
 	}
 
-	private async checkIdUser(ctx: any) {
+	public async getcheckIdUser(ctx: any) {
 		const { userId } = ctx.params;
 
 		const checkId = await UsersController.checkIdUser(userId);
@@ -82,17 +81,15 @@ export default class UsersService extends Service {
 	}
 
 	private async signin(ctx: any) {
-		const { username, password } = ctx.params;
+		const { username, password }: signindto = ctx.params;
 
-		const signin = await UsersController.signin(username, password);
+		const signined = await UsersController.signin(username, password);
 
-		return signin;
+		return signined;
 	}
 
 	private async signup(ctx: any) {
 		const { username, password, address, age } = ctx.params;
-
-		console.log(username, password, address, age);
 
 		const created = await UsersController.signup(
 			username,
@@ -102,6 +99,16 @@ export default class UsersService extends Service {
 		);
 
 		return created;
+	}
+
+	private async verifyToken(ctx: any) {
+		const { token } = ctx.params;
+
+		console.log(token);
+
+		const verify = UsersController.verifyToken(token);
+
+		return verify;
 	}
 
 	private async update(ctx: any) {
@@ -117,5 +124,11 @@ export default class UsersService extends Service {
 		);
 
 		return updatedUser;
+	}
+
+	private async getAllUser() {
+		const listusers = await UsersController.getAllUser();
+
+		return listusers;
 	}
 }
