@@ -1,7 +1,7 @@
 import { Service, ServiceBroker } from "moleculer";
-import { UsersController } from "../src/users/users.controller";
-import { signupdto } from "../src/users/dto/signup.dto";
+
 import { signindto } from "../src/users/dto/signin.dto";
+import { UsersController } from "../src/users/users.controller";
 
 export default class UsersService extends Service {
 	// @ts-ignore
@@ -24,14 +24,12 @@ export default class UsersService extends Service {
 
 				signup: {
 					rest: "POST /sign-up",
-
 					params: {
 						username: { type: "string", optional: true },
 						password: { type: "string", min: 6, optional: true },
 						address: "string",
 						age: "number",
 					},
-
 					handler: this.signup,
 				},
 
@@ -103,8 +101,6 @@ export default class UsersService extends Service {
 
 	private async verifyToken(ctx: any) {
 		const { token } = ctx.params;
-
-		console.log(token);
 
 		const verify = UsersController.verifyToken(token);
 

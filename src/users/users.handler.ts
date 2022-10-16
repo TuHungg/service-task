@@ -67,7 +67,7 @@ export class UsersHandler implements UserRepository {
 		}
 
 		const accessToken = sign(
-			{ _id: user.userId, username, role: user.role },
+			{ _id: user.userId, role: user.role },
 			process.env.SECRET_KEY,
 			{ algorithm: "HS256", expiresIn: "1h" }
 		);

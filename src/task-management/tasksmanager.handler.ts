@@ -26,27 +26,31 @@ export class TasksManagementHandler implements TasksManagementRepository {
 	}
 
 	public async createTaskforUser(
-		taskId: string,
-		userId: string,
+		taskId: mongoose.Types.ObjectId,
+		userId: mongoose.Types.ObjectId,
 		status: string
 	): Promise<string> {
 		const model = await this.getTasksManagementModel();
 
 		const taskstartdate = new Date().toLocaleDateString();
 
-		const taskenddate = "0/0/0";
+		const taskenddate = "01/01/2022";
 
-		const setedTask = await model.create({
-			taskId,
-			userId,
-			status,
-			taskstartdate,
-			taskenddate,
-		});
+		if (status === "doing" || status === "done") {
+			const setedTask = await model.create({
+				taskId,
+				userId,
+				status,
+				taskstartdate,
+				taskenddate,
+			});
 
-		await setedTask.save();
+			await setedTask.save();
 
-		return "Set task for user successfully";
+			return "Set task for user successfully";
+		}
+
+		return "Set Task Failed";
 	}
 
 	public async setTaskforUser(
@@ -62,15 +66,23 @@ export class TasksManagementHandler implements TasksManagementRepository {
 	}
 
 	public async getTaskListbyUserId(
-		userId: string
+		userId: mongoose.Types.ObjectId
 	): Promise<TasksManagement[]> {
 		const model = await this.getTasksManagementModel();
-		console.log("Handler---->", userId);
 
 		const taskList = await model.find({ userId }).exec();
 
-		console.log("Handler---->", taskList);
-
 		return taskList;
+	}
+
+	public async getAllTask(page: number): Promise<TasksManagement[]> {
+		const model = await this.getTasksManagementModel();
+
+		const result = model
+			.find()
+			.limit(5)
+			.skip(page * 5);
+
+		return result;
 	}
 }

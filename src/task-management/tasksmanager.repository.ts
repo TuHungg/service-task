@@ -3,16 +3,20 @@ import { TasksManagement } from "./schemas/tasksmanager.schema";
 
 export interface TasksManagementRepository {
 	createTaskforUser(
-		taskId: string,
-		userId: string,
+		taskId: mongoose.Types.ObjectId,
+		userId: mongoose.Types.ObjectId,
 		status: string
 	): Promise<string>;
 
-	getTaskListbyUserId(userId: string): Promise<TasksManagement[]>;
+	getTaskListbyUserId(
+		userId: mongoose.Types.ObjectId
+	): Promise<TasksManagement[]>;
 
 	setTaskforUser(
 		_id: mongoose.Types.ObjectId,
 		status: string,
 		taskenddate: string
 	): Promise<string>;
+
+	getAllTask(page: number): Promise<TasksManagement[]>;
 }

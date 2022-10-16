@@ -1,6 +1,7 @@
 "use strict";
 import { Service, ServiceBroker } from "moleculer";
 import { TasksManagementController } from "../src/task-management/tasksmanager.controller";
+import { setTask } from "../src/task-management/dto/set-task.dto";
 
 export default class UserTaskManagementService extends Service {
 	// @ts-ignore
@@ -14,13 +15,13 @@ export default class UserTaskManagementService extends Service {
 
 			hooks: {
 				before: {
-					create: [this.hookcheckTaskUser],
+					create: [this.hookCheckTaskUser],
 				},
 			},
 
 			actions: {
 				create: {
-					rest: "POST /settask",
+					rest: "POST /set-task",
 					params: {
 						taskId: { type: "string", optional: true },
 						userId: { type: "string", optional: true },
@@ -42,12 +43,21 @@ export default class UserTaskManagementService extends Service {
 				},
 
 				getTaskList: {
-					rest: "POST /tasklistby-UserId",
+					rest: "GET /tasklist",
 					params: {
-						userId: { type: "string", optional: true },
+						id: { type: "string", optional: true },
 					},
 
 					handler: this.getTasksListbyUserId,
+				},
+
+				getAllTask: {
+					rest: "GET /getAllTask",
+					params: {
+						page: { type: "number", optional: false },
+					},
+
+					handler: this.getAllTask,
 				},
 			},
 
@@ -59,8 +69,8 @@ export default class UserTaskManagementService extends Service {
 		});
 	}
 
-	public async hookcheckTaskUser(ctx): Promise<void> {
-		const { taskId, userId, status } = ctx.params;
+	public async hookCheckTaskUser(ctx): Promise<void> {
+		const { taskId, userId, status }: setTask = ctx.params;
 
 		const checkUser: boolean = await this.broker.call(
 			"user.checkIdUser",
@@ -71,8 +81,6 @@ export default class UserTaskManagementService extends Service {
 			"task.checkIdTask",
 			ctx.params
 		);
-
-		console.log(checkTask);
 
 		if (checkUser === false || checkTask === false) {
 			throw new Error("User or Task exits");
@@ -112,8 +120,16 @@ export default class UserTaskManagementService extends Service {
 			userId
 		);
 
-		console.log("listTask--------------------->", listTask);
+		console.log("listTask -->", listTask);
 
 		return listTask;
+	}
+
+	public async getAllTask(ctx: any) {
+		const { page } = ctx.params;
+
+		const result = await TasksManagementController.getAllTask(page);
+
+		return result;
 	}
 }

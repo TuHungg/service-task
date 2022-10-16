@@ -13,8 +13,8 @@ export class TasksManagementController {
 	}
 
 	public static createTaskforUser(
-		taskId: string,
-		userId: string,
+		taskId: mongoose.Types.ObjectId,
+		userId: mongoose.Types.ObjectId,
 		status: string
 	): Promise<string> {
 		return TasksManagementController.tasksManagementHandler.createTaskforUser(
@@ -37,10 +37,16 @@ export class TasksManagementController {
 	}
 
 	public static getTasksListbyUserId(
-		userId: string
+		userId: mongoose.Types.ObjectId
 	): Promise<TasksManagement[]> {
 		return TasksManagementController.tasksManagementHandler.getTaskListbyUserId(
 			userId
+		);
+	}
+
+	public static getAllTask(page: number): Promise<TasksManagement[]> {
+		return TasksManagementController.tasksManagementHandler.getAllTask(
+			page
 		);
 	}
 }

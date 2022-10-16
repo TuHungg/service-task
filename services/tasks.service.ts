@@ -1,6 +1,5 @@
 "use strict";
 import { Service, ServiceBroker } from "moleculer";
-import { createtasksdto } from "src/task/dto/createtasks.dto";
 import { TasksController } from "../src/task/tasks.controller";
 
 export default class TasksService extends Service {

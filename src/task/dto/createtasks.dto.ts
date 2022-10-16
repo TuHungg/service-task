@@ -1,4 +1,4 @@
-export class createtasksdto {
+export class setTaskDto {
 	taskname: string;
 	context: string;
 	status: string;
