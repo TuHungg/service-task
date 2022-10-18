@@ -1,13 +1,12 @@
-import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import mongoose from "mongoose";
-import { TasksManagementRepository } from "./tasksmanager.repository";
-import {
-	TasksManagementSchema,
-	TasksManagement,
-} from "./schemas/tasksmanager.schema";
 
-@Injectable()
+import {
+	TasksManagement,
+	TasksManagementSchema,
+} from "./schemas/tasksmanager.schema";
+import { TasksManagementRepository } from "./tasksmanager.repository";
+
 export class TasksManagementHandler implements TasksManagementRepository {
 	public constructor(
 		@InjectModel(TasksManagement.name)
@@ -32,17 +31,14 @@ export class TasksManagementHandler implements TasksManagementRepository {
 	): Promise<string> {
 		const model = await this.getTasksManagementModel();
 
-		const taskstartdate = new Date().toLocaleDateString();
-
-		const taskenddate = "01/01/2022";
-
-		if (status === "doing" || status === "done") {
+		if (
+			status.toLocaleLowerCase() === "doing" ||
+			status.toLocaleLowerCase() === "done"
+		) {
 			const setedTask = await model.create({
 				taskId,
 				userId,
 				status,
-				taskstartdate,
-				taskenddate,
 			});
 
 			await setedTask.save();
@@ -50,19 +46,25 @@ export class TasksManagementHandler implements TasksManagementRepository {
 			return "Set task for user successfully";
 		}
 
-		return "Set Task Failed";
+		return "Set Task Failed!";
 	}
 
 	public async setTaskforUser(
 		_id: mongoose.Types.ObjectId,
-		status: string,
-		taskenddate: string
+		status: string
 	): Promise<string> {
 		const model = await this.getTasksManagementModel();
 
-		await model.updateOne({ _id }, { status, taskenddate });
+		if (
+			status.toLocaleLowerCase() === "doing" ||
+			status.toLocaleLowerCase() === "done"
+		) {
+			await model.updateOne({ _id }, { status });
 
-		return "Set task sucessfully";
+			return "Update Task sucessfully!";
+		}
+
+		return "Update Task Faild!";
 	}
 
 	public async getTaskListbyUserId(
@@ -84,5 +86,22 @@ export class TasksManagementHandler implements TasksManagementRepository {
 			.skip(page * 5);
 
 		return result;
+	}
+
+	public async checkDBDuplicate(
+		taskId: mongoose.Types.ObjectId,
+		userId: mongoose.Types.ObjectId
+	): Promise<boolean> {
+		const model = await this.getTasksManagementModel();
+
+		const checkUserId = await model.find({ taskId });
+
+		const checkTaskId = await model.find({ userId });
+
+		if (!checkUserId && !checkTaskId) {
+			return false;
+		}
+
+		return true;
 	}
 }

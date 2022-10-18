@@ -12,30 +12,17 @@ export class TasksController {
 
 	public static async createTask(
 		taskname: string,
-		context: string,
-		status: string
+		context: string
 	): Promise<string> {
-		return TasksController.tasksHandler.createTask(
-			taskname,
-			context,
-			status
-		);
+		return TasksController.tasksHandler.createTask(taskname, context);
 	}
 
 	public static update(
 		taskId: mongoose.Types.ObjectId,
 		taskname?: string,
-		context?: string,
-		status?: string,
-		datecreated?: string
+		context?: string
 	): Promise<string> {
-		return TasksController.tasksHandler.update(
-			taskId,
-			taskname,
-			context,
-			status,
-			datecreated
-		);
+		return TasksController.tasksHandler.update(taskId, taskname, context);
 	}
 
 	public static async delete(

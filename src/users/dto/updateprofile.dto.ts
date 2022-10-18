@@ -1,6 +1,6 @@
-export class updateprofile {
-	username: string;
-	password: string;
-	address?: string;
-	age?: number;
+import { mongoose } from "mongoose";
+export class updateProfileDto {
+	_id: mongoose.Types.ObjectId;
+	username?: string;
+	address: string;
 }

@@ -1,7 +1,9 @@
 import { Service, ServiceBroker } from "moleculer";
 
 import { signindto } from "../src/users/dto/signin.dto";
+import { signupdto } from "../src/users/dto/signup.dto";
 import { UsersController } from "../src/users/users.controller";
+import { updateProfileDto } from "./../src/users/dto/updateprofile.dto";
 
 export default class UsersService extends Service {
 	// @ts-ignore
@@ -17,24 +19,19 @@ export default class UsersService extends Service {
 
 			actions: {
 				getAllUser: {
-					rest: "GET /",
-
 					handler: this.getAllUser,
 				},
 
 				signup: {
-					rest: "POST /sign-up",
 					params: {
 						username: { type: "string", optional: true },
 						password: { type: "string", min: 6, optional: true },
 						address: "string",
-						age: "number",
 					},
 					handler: this.signup,
 				},
 
 				signin: {
-					rest: "POST /sign-in",
 					params: {
 						username: { type: "string", optional: true },
 						password: { type: "string", optional: true },
@@ -42,16 +39,12 @@ export default class UsersService extends Service {
 					handler: this.signin,
 				},
 
-				update: {
-					rest: "PUT /update-profile",
-
+				updateProfile: {
 					params: {
 						_id: { type: "string", optional: true },
-						username: { type: "string", optional: false },
 						address: { type: "string", optional: false },
-						age: { type: "string", optional: false },
 					},
-					handler: this.update,
+					handler: this.updateProfile,
 				},
 
 				checkIdUser: {
@@ -66,7 +59,7 @@ export default class UsersService extends Service {
 			events: {},
 
 			methods: {},
-			dependencies: ["nodechild"],
+			dependencies: ["gateway"],
 		});
 	}
 
@@ -81,19 +74,22 @@ export default class UsersService extends Service {
 	private async signin(ctx: any) {
 		const { username, password }: signindto = ctx.params;
 
+		await this.broker.emit("user.signin", ctx.params, [
+			"userTaskManagement",
+		]);
+
 		const signined = await UsersController.signin(username, password);
 
 		return signined;
 	}
 
 	private async signup(ctx: any) {
-		const { username, password, address, age } = ctx.params;
+		const { username, password, address }: signupdto = ctx.params;
 
 		const created = await UsersController.signup(
 			username,
 			password,
-			address,
-			age
+			address
 		);
 
 		return created;
@@ -107,17 +103,10 @@ export default class UsersService extends Service {
 		return verify;
 	}
 
-	private async update(ctx: any) {
-		const { _id, username, address, age } = ctx.params;
+	private async updateProfile(ctx: any) {
+		const { _id, address }: updateProfileDto = ctx.params;
 
-		console.log(_id, username, address, age);
-
-		const updatedUser = await UsersController.update(
-			_id,
-			username,
-			address,
-			age
-		);
+		const updatedUser = await UsersController.update(_id, address);
 
 		return updatedUser;
 	}

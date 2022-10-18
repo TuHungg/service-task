@@ -1,6 +1,7 @@
 import { Controller } from "@nestjs/common";
 import { JwtPayload } from "jsonwebtoken";
 import mongoose from "mongoose";
+
 import { UsersHandler } from "./users.handler";
 
 @Controller()
@@ -18,24 +19,16 @@ export class UsersController {
 	public static signup(
 		username: string,
 		password: string,
-		address?: string,
-		age?: number
+		address?: string
 	): Promise<string> {
-		return UsersController.usersHandler.signup(
-			username,
-			password,
-			address,
-			age
-		);
+		return UsersController.usersHandler.signup(username, password, address);
 	}
 
 	public static update(
 		_id: mongoose.Types.ObjectId,
-		username: string,
-		address?: string,
-		age?: number
+		address?: string
 	): Promise<string> {
-		return UsersController.usersHandler.update(_id, username, address, age);
+		return UsersController.usersHandler.update(_id, address);
 	}
 
 	public static checkIdUser(id: string) {

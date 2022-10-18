@@ -26,13 +26,11 @@ export class TasksManagementController {
 
 	public static setTaskforUser(
 		_id: mongoose.Types.ObjectId,
-		status: string,
-		taskenddate: string
+		status: string
 	): Promise<string> {
 		return TasksManagementController.tasksManagementHandler.setTaskforUser(
 			_id,
-			status,
-			taskenddate
+			status
 		);
 	}
 
@@ -47,6 +45,16 @@ export class TasksManagementController {
 	public static getAllTask(page: number): Promise<TasksManagement[]> {
 		return TasksManagementController.tasksManagementHandler.getAllTask(
 			page
+		);
+	}
+
+	public static checkDbduplicate(
+		taskId: mongoose.Types.ObjectId,
+		userId: mongoose.Types.ObjectId
+	): Promise<boolean> {
+		return TasksManagementController.tasksManagementHandler.checkDBDuplicate(
+			taskId,
+			userId
 		);
 	}
 }

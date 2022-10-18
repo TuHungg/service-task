@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
-import { TasksManagementHandler } from "../task-management/tasksmanager.handler";
+import { TasksManagementHandler } from "../user-task-management/tasksmanager.handler";
 import {
 	TasksManagement,
 	TasksManagementSchema,

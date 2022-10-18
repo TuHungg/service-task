@@ -1,14 +1,11 @@
-import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { compare, hash } from "bcryptjs";
 import { JwtPayload, sign, verify } from "jsonwebtoken";
 import mongoose from "mongoose";
 
-import { v4 as uuidv4 } from "uuid";
 import { User, UserSchema } from "./schemas/users.schemas";
 import { UserRepository } from "./users.repository";
 
-@Injectable()
 export class UsersHandler implements UserRepository {
 	public constructor(
 		@InjectModel(User.name) private userModel: mongoose.Model<User>
@@ -33,23 +30,20 @@ export class UsersHandler implements UserRepository {
 	public async signup(
 		username: string,
 		password: string,
-		address?: string,
-		age?: number
+		address?: string
 	): Promise<string> {
 		const model = await this.getUserModel();
 
 		const hashPassword = await hash(password, 12);
-		const userId = uuidv4();
 
 		const user = await model.create({
-			userId,
 			username,
 			password: hashPassword,
 			address,
-			age,
 		});
 
 		await user.save();
+
 		return `Sign up ${username} successfully`;
 	}
 
@@ -63,13 +57,13 @@ export class UsersHandler implements UserRepository {
 		const checkedPassword = await compare(password, user.password);
 
 		if (!checkedPassword) {
-			return `User ${username} of password invalid`;
+			return "User or password invalid";
 		}
 
 		const accessToken = sign(
-			{ _id: user.userId, role: user.role },
+			{ _id: user.username, role: user.role },
 			process.env.SECRET_KEY,
-			{ algorithm: "HS256", expiresIn: "1h" }
+			{ algorithm: "HS256", expiresIn: "24h" }
 		);
 
 		return accessToken;
@@ -77,15 +71,13 @@ export class UsersHandler implements UserRepository {
 
 	public async update(
 		_id: mongoose.Types.ObjectId,
-		username: string,
-		address: string,
-		age: number
+		address?: string
 	): Promise<string> {
 		const model = await this.getUserModel();
 
-		await model.updateOne({ _id }, { username, address, age });
+		await model.updateOne({ _id }, { address });
 
-		return `Update user have value { ${username}, ${address}, ${age} }`;
+		return `Update user have value {  ${address} }`;
 	}
 
 	public async checkIdUser(id: string): Promise<boolean> {

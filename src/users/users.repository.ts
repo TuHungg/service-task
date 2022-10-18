@@ -5,20 +5,14 @@ export interface UserRepository {
 	signup(
 		username: string,
 		password: string,
-		address?: string,
-		age?: number
+		address?: string
 	): Promise<string>;
 
 	verifyToken(token: string): JwtPayload | string;
 
 	signin(username: string, password: string): Promise<string>;
 
-	update(
-		_id: mongoose.Types.ObjectId,
-		username: string,
-		address: string,
-		employees: number
-	): Promise<string>;
+	update(_id: mongoose.Types.ObjectId, address?: string): Promise<string>;
 
 	checkIdUser(id: string): Promise<boolean>;
 

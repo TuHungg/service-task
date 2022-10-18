@@ -3,7 +3,7 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { ConfigModule } from "@nestjs/config";
 import { UsersModule } from "./users/users.module";
 import { TasksModule } from "./task/tasks.module";
-import { TasksManagerModule } from "./task-management/tasksmanager.module";
+import { TasksManagerModule } from "./user-task-management/tasksmanager.module";
 
 @Module({
 	imports: [

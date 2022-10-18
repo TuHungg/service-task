@@ -14,9 +14,13 @@ export interface TasksManagementRepository {
 
 	setTaskforUser(
 		_id: mongoose.Types.ObjectId,
-		status: string,
-		taskenddate: string
+		status: string
 	): Promise<string>;
 
 	getAllTask(page: number): Promise<TasksManagement[]>;
+
+	checkDBDuplicate(
+		taskId: mongoose.Types.ObjectId,
+		userId: mongoose.Types.ObjectId
+	): Promise<boolean>;
 }

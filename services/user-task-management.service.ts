@@ -1,7 +1,8 @@
-"use strict";
 import { Service, ServiceBroker } from "moleculer";
-import { TasksManagementController } from "../src/task-management/tasksmanager.controller";
-import { setTask } from "../src/task-management/dto/set-task.dto";
+
+import { TasksManagementController } from "../src/user-task-management/tasksmanager.controller";
+import { updateTaskListDto } from "./../src/user-task-management/dto/set-task-list.dto";
+import { setTaskListDto } from "./../src/user-task-management/dto/update-task-list";
 
 export default class UserTaskManagementService extends Service {
 	// @ts-ignore
@@ -9,19 +10,19 @@ export default class UserTaskManagementService extends Service {
 		super(broker);
 
 		this.parseServiceSchema({
-			name: "userTaskManagement",
+			name: "user-task-management",
 
 			settings: {},
 
 			hooks: {
 				before: {
 					create: [this.hookCheckTaskUser],
+					"*": [this.hookCheckRole],
 				},
 			},
 
 			actions: {
 				create: {
-					rest: "POST /set-task",
 					params: {
 						taskId: { type: "string", optional: true },
 						userId: { type: "string", optional: true },
@@ -31,19 +32,16 @@ export default class UserTaskManagementService extends Service {
 					handler: this.createTaskforUser,
 				},
 
-				setTasks: {
-					rest: "PUT /update-task",
+				updateTaskList: {
 					params: {
 						_id: { type: "string", optional: true },
 						status: { type: "string", optional: true },
-						taskenddate: { type: "string", optional: true },
 					},
 
-					handler: this.setTaskforUser,
+					handler: this.updateTaskList,
 				},
 
 				getTaskList: {
-					rest: "GET /tasklist",
 					params: {
 						id: { type: "string", optional: true },
 					},
@@ -52,7 +50,6 @@ export default class UserTaskManagementService extends Service {
 				},
 
 				getAllTask: {
-					rest: "GET /getAllTask",
 					params: {
 						page: { type: "number", optional: false },
 					},
@@ -61,16 +58,30 @@ export default class UserTaskManagementService extends Service {
 				},
 			},
 
-			events: {},
+			events: {
+				"user.signin": {
+					params: {
+						username: "string",
+						password: "string",
+					},
+					async handler(ctx: any) {
+						console.log();
+
+						this.logger.info(
+							`User --> ${ctx.params.username} <-- Sign In In System`
+						);
+					},
+				},
+			},
 
 			methods: {},
 
-			dependencies: ["nodechild"],
+			dependencies: ["gateway"],
 		});
 	}
 
-	public async hookCheckTaskUser(ctx): Promise<void> {
-		const { taskId, userId, status }: setTask = ctx.params;
+	public async hookCheckTaskUser(ctx: any): Promise<void> {
+		const { taskId, userId, status }: setTaskListDto = ctx.params;
 
 		const checkUser: boolean = await this.broker.call(
 			"user.checkIdUser",
@@ -88,9 +99,7 @@ export default class UserTaskManagementService extends Service {
 	}
 
 	public async createTaskforUser(ctx: any) {
-		const { taskId, userId, status } = ctx.params;
-
-		console.log(taskId, userId, status);
+		const { taskId, userId, status }: setTaskListDto = ctx.params;
 
 		const create = await TasksManagementController.createTaskforUser(
 			taskId,
@@ -101,13 +110,12 @@ export default class UserTaskManagementService extends Service {
 		return create;
 	}
 
-	public async setTaskforUser(ctx: any) {
-		const { _id, status, taskenddate } = ctx.params;
+	public async updateTaskList(ctx: any) {
+		const { _id, status }: updateTaskListDto = ctx.params;
 
 		const update = await TasksManagementController.setTaskforUser(
 			_id,
-			status,
-			taskenddate
+			status
 		);
 
 		return update;
@@ -120,8 +128,6 @@ export default class UserTaskManagementService extends Service {
 			userId
 		);
 
-		console.log("listTask -->", listTask);
-
 		return listTask;
 	}
 
@@ -131,5 +137,26 @@ export default class UserTaskManagementService extends Service {
 		const result = await TasksManagementController.getAllTask(page);
 
 		return result;
+	}
+
+	public async hookCheckRole(ctx: any): Promise<void> {
+		const { role } = ctx.meta.user;
+
+		if (role !== "admin") {
+			throw new Error("You must have <admin> role");
+		}
+	}
+
+	public async checkDbDuplicate(ctx: any) {
+		const { userId, taskId } = ctx.params;
+
+		const result = await TasksManagementController.checkDbduplicate(
+			userId,
+			taskId
+		);
+
+		if (result == true) {
+			throw new Error("Value have existed");
+		}
 	}
 }

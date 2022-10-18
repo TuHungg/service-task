@@ -1,6 +1,8 @@
-"use strict";
 import { Service, ServiceBroker } from "moleculer";
+import { setTaskDto } from "src/task/dto/create-tasks.dto";
+
 import { TasksController } from "../src/task/tasks.controller";
+import { updateTaskDto } from "./../src/task/dto/update-tasks-dto";
 
 export default class TasksService extends Service {
 	// @ts-ignore
@@ -15,55 +17,51 @@ export default class TasksService extends Service {
 
 			actions: {
 				create: {
-					rest: "POST /created-task",
-
 					params: {
 						taskname: { type: "string", optional: false },
 						context: { type: "string", optional: false },
-						status: { type: "string", optional: false },
 					},
 					handler: this.create,
 				},
 
 				update: {
-					rest: "PUT /update-task",
-
 					params: {
 						taskId: { type: "string", optional: false },
 						taskname: { type: "string", optional: true },
 						context: { type: "string", optional: true },
-						status: { type: "string", optional: true },
-						datecreated: { type: "string", optional: true },
 					},
 
 					handler: this.update,
 				},
 
 				getAll: {
-					rest: "GET /findAll",
-
 					handler: this.getAllTask,
 				},
 
 				async checkIdTask(cxt: any) {
 					const result = await this.checkTask(cxt);
 
-					console.log("check Task: ", result);
-
 					return result;
 				},
 			},
 
-			events: {},
+			events: {
+				"user.signin": {
+					params: {
+						username: "string",
+						password: "string",
+					},
+					async handler(ctx: any) {
+						this.logger.info(
+							`TASK --> ${ctx.params.username} <-- Sign In In System`
+						);
+					},
+				},
+			},
 
 			methods: {},
-			/**
-			 * Loading sample data to the collection.
-			async afterConnected() {
-			 await this.adapter.collection.createIndex({ name: 1 });
-			},
-			 */
-			dependencies: ["nodechild"],
+
+			dependencies: ["gateway"],
 		});
 	}
 
@@ -76,26 +74,20 @@ export default class TasksService extends Service {
 	}
 
 	private async create(ctx: any) {
-		const { taskname, context, status } = ctx.params;
+		const { taskname, context }: setTaskDto = ctx.params;
 
-		const creted = await TasksController.createTask(
-			taskname,
-			context,
-			status
-		);
+		const creted = await TasksController.createTask(taskname, context);
 
 		return creted;
 	}
 
 	private async update(ctx: any) {
-		const { taskId, taskname, context, status, datecreated } = ctx.params;
+		const { taskId, taskname, context }: updateTaskDto = ctx.params;
 
 		const updateTask = await TasksController.update(
 			taskId,
 			taskname,
-			context,
-			status,
-			datecreated
+			context
 		);
 
 		return updateTask;
