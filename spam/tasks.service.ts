@@ -2,7 +2,7 @@ import { Service, ServiceBroker } from "moleculer";
 import { setTaskDto } from "src/task/dto/create-tasks.dto";
 
 import { TasksController } from "../src/task/tasks.controller";
-import { updateTaskDto } from "./../src/task/dto/update-tasks-dto";
+import { updateTaskDto } from "../src/task/dto/update-tasks-dto";
 
 export default class TasksService extends Service {
 	// @ts-ignore

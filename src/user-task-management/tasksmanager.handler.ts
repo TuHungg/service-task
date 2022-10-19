@@ -2,82 +2,51 @@ import { InjectModel } from "@nestjs/mongoose";
 import mongoose from "mongoose";
 
 import {
-	TasksManagement,
-	TasksManagementSchema,
+	TaskItem,
+	TaskList,
+	TaskListSchema,
 } from "./schemas/tasksmanager.schema";
 import { TasksManagementRepository } from "./tasksmanager.repository";
 
 export class TasksManagementHandler implements TasksManagementRepository {
 	public constructor(
-		@InjectModel(TasksManagement.name)
-		private tasksManagementModel: mongoose.Model<TasksManagement>
+		@InjectModel(TaskList.name)
+		private taskListModel: mongoose.Model<TaskList>
 	) {}
 
 	public async getTasksManagementModel() {
-		if (!this.tasksManagementModel) {
-			this.tasksManagementModel = mongoose.model(
-				"tasksManagement",
-				TasksManagementSchema
-			);
+		if (!this.taskListModel) {
+			this.taskListModel = mongoose.model("task_list", TaskListSchema);
 		}
 
-		return this.tasksManagementModel;
+		return this.taskListModel;
 	}
 
-	public async createTaskforUser(
-		taskId: mongoose.Types.ObjectId,
-		userId: mongoose.Types.ObjectId,
+	public async createTaskItem(
+		title: string,
+		context: string,
 		status: string
 	): Promise<string> {
-		const model = await this.getTasksManagementModel();
+		const taskList = await this.getTasksManagementModel();
 
-		if (
-			status.toLocaleLowerCase() === "doing" ||
-			status.toLocaleLowerCase() === "done"
-		) {
-			const setedTask = await model.create({
-				taskId,
-				userId,
-				status,
-			});
+		const created = await taskList.create({ title, context, status });
 
-			await setedTask.save();
+		await created.save();
 
-			return "Set task for user successfully";
-		}
-
-		return "Set Task Failed!";
-	}
-
-	public async setTaskforUser(
-		_id: mongoose.Types.ObjectId,
-		status: string
-	): Promise<string> {
-		const model = await this.getTasksManagementModel();
-
-		if (
-			status.toLocaleLowerCase() === "doing" ||
-			status.toLocaleLowerCase() === "done"
-		) {
-			await model.updateOne({ _id }, { status });
-
-			return "Update Task sucessfully!";
-		}
-
-		return "Update Task Faild!";
+		return "Create Task Item successfully";
 	}
 
 	public async getTaskListbyUserId(
 		userId: mongoose.Types.ObjectId
-	): Promise<TasksManagement[]> {
+	): Promise<TaskList[]> {
 		const model = await this.getTasksManagementModel();
 
-		const taskList = await model.find({ userId }).exec();
+		const taskList = await model.find({ user: userId }).exec();
 
 		return taskList;
 	}
 
-	public async getAllTask(page: number): Promise<TasksManagement[]> {
+	public async getAllTask(page: number): Promise<TaskList[]> {
 		const model = await this.getTasksManagementModel();
 
 		const result = model
@@ -88,20 +57,43 @@ export class TasksManagementHandler implements TasksManagementRepository {
 		return result;
 	}
 
-	public async checkDBDuplicate(
-		taskId: mongoose.Types.ObjectId,
-		userId: mongoose.Types.ObjectId
-	): Promise<boolean> {
+	public async updateStatus(_id: mongoose.Types.ObjectId, status: string): Promise<string> {
 		const model = await this.getTasksManagementModel();
 
-		const checkUserId = await model.find({ taskId });
+		await model.updateOne(
+			{ _id },
+			{ status }
+		);
 
-		const checkTaskId = await model.find({ userId });
+		return "Update status successflly";
+	}
 
-		if (!checkUserId && !checkTaskId) {
-			return false;
-		}
+	public async findTask(_id: mongoose.Types.ObjectId): Promise<TaskItem[]> {
+		const model = await this.getTasksManagementModel();
 
-		return true;
+		const result: TaskItem[] = await model.find({ "task_item._id": _id });
+
+		return result;
+	}
+
+	public async checkDBDuplicate(
+		_id: mongoose.Types.ObjectId
+	): Promise<TaskItem[]> {
+		const model = await this.getTasksManagementModel();
+
+		const result: TaskItem[] = await model.find({ "task_item._id": _id });
+
+		return result;
+	}
+
+	public async setTaskforUser(
+		_id: mongoose.Types.ObjectId,
+		userId: mongoose.Types.ObjectId
+	): Promise<string> {
+		const model = await this.getTasksManagementModel();
+
+		await model.updateOne({ _id }, { $push: { user: userId } });
+
+		return "Set Task for user successfully";
 	}
 }

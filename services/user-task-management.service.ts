@@ -15,33 +15,30 @@ export default class UserTaskManagementService extends Service {
 			settings: {},
 
 			hooks: {
-				before: {
-					create: [this.hookCheckTaskUser],
-					"*": [this.hookCheckRole],
-				},
+				before: {},
 			},
 
 			actions: {
 				create: {
 					params: {
-						taskId: { type: "string", optional: true },
-						userId: { type: "string", optional: true },
+						title: { type: "string", optional: true },
+						context: { type: "string", optional: true },
 						status: { type: "string", optional: true },
 					},
 
 					handler: this.createTaskforUser,
 				},
 
-				updateTaskList: {
+				updateStatus: {
 					params: {
 						_id: { type: "string", optional: true },
 						status: { type: "string", optional: true },
 					},
 
-					handler: this.updateTaskList,
+					handler: this.updateStatus,
 				},
 
-				getTaskList: {
+				getTasksListbyUserId: {
 					params: {
 						id: { type: "string", optional: true },
 					},
@@ -49,12 +46,21 @@ export default class UserTaskManagementService extends Service {
 					handler: this.getTasksListbyUserId,
 				},
 
-				getAllTask: {
+				getTaskList: {
 					params: {
 						page: { type: "number", optional: false },
 					},
 
-					handler: this.getAllTask,
+					handler: this.getTaskList,
+				},
+
+				setTask: {
+					params: {
+						_id: { type: "string", optional: false },
+						userId: { type: "string", optional: false },
+					},
+
+					handler: this.setTask,
 				},
 			},
 
@@ -80,45 +86,27 @@ export default class UserTaskManagementService extends Service {
 		});
 	}
 
-	public async hookCheckTaskUser(ctx: any): Promise<void> {
-		const { taskId, userId, status }: setTaskListDto = ctx.params;
-
-		const checkUser: boolean = await this.broker.call(
-			"user.checkIdUser",
-			ctx.params
-		);
-
-		const checkTask = await this.broker.call(
-			"task.checkIdTask",
-			ctx.params
-		);
-
-		if (checkUser === false || checkTask === false) {
-			throw new Error("User or Task exits");
-		}
-	}
-
 	public async createTaskforUser(ctx: any) {
-		const { taskId, userId, status }: setTaskListDto = ctx.params;
+		const { title, context, status } = ctx.params;
 
-		const create = await TasksManagementController.createTaskforUser(
-			taskId,
-			userId,
+		const result = await TasksManagementController.createTaskItem(
+			title,
+			context,
 			status
 		);
 
-		return create;
+		return result;
 	}
 
-	public async updateTaskList(ctx: any) {
-		const { _id, status }: updateTaskListDto = ctx.params;
+	public async updateStatus(ctx: any) {
+		const { _id, status } = ctx.params;
 
-		const update = await TasksManagementController.setTaskforUser(
+		const result = await TasksManagementController.updateStatus(
 			_id,
 			status
 		);
 
-		return update;
+		return result;
 	}
 
 	public async getTasksListbyUserId(ctx: any) {
@@ -131,7 +119,7 @@ export default class UserTaskManagementService extends Service {
 		return listTask;
 	}
 
-	public async getAllTask(ctx: any) {
+	public async getTaskList(ctx: any) {
 		const { page } = ctx.params;
 
 		const result = await TasksManagementController.getAllTask(page);
@@ -139,24 +127,14 @@ export default class UserTaskManagementService extends Service {
 		return result;
 	}
 
-	public async hookCheckRole(ctx: any): Promise<void> {
-		const { role } = ctx.meta.user;
+	public async setTask(ctx: any) {
+		const { _id, userId } = ctx.params;
 
-		if (role !== "admin") {
-			throw new Error("You must have <admin> role");
-		}
-	}
-
-	public async checkDbDuplicate(ctx: any) {
-		const { userId, taskId } = ctx.params;
-
-		const result = await TasksManagementController.checkDbduplicate(
-			userId,
-			taskId
+		const result = await TasksManagementController.setTaskforUser(
+			_id,
+			userId
 		);
 
-		if (result == true) {
-			throw new Error("Value have existed");
-		}
+		return result;
 	}
 }

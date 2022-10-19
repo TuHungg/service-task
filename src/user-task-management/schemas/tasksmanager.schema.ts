@@ -1,20 +1,45 @@
+/* eslint-disable max-classes-per-file */
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document } from "mongoose";
 import mongoose from "mongoose";
+// Import { Task } from "src/task/schemas/tasks.schema";
 
-export type TasksManagementDocument = TasksManagement & Document;
+export type TaskListDocument = TaskList & Document;
+
+export enum TaskStatus {
+	DONE = "DONE",
+	NOTDONE = "NOT DONE",
+}
 
 @Schema({ timestamps: true })
-export class TasksManagement {
-	@Prop({ type: String, required: true })
-	public taskId: mongoose.Types.ObjectId;
+export class TaskItem {
+	@Prop({ required: true })
+	public title: string;
 
-	@Prop({ type: String, required: true })
-	public userId: mongoose.Types.ObjectId;
+	@Prop({ required: true })
+	public context: string;
 
-	@Prop({ type: String, required: true })
+	@Prop()
+	public user: string[];
+
+	@Prop({ required: true })
 	public status: string;
 }
 
-export const TasksManagementSchema =
-	SchemaFactory.createForClass(TasksManagement);
+@Schema({ timestamps: true })
+export class TaskList {
+	@Prop({ type: Array })
+	@Prop({ required: true })
+	public title: string;
+
+	@Prop({ required: true })
+	public context: string;
+
+	@Prop()
+	public user: string[];
+
+	@Prop({ required: true })
+	public status: string;
+}
+
+export const TaskListSchema = SchemaFactory.createForClass(TaskList);

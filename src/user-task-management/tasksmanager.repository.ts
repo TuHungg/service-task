@@ -1,26 +1,23 @@
 import mongoose from "mongoose";
-import { TasksManagement } from "./schemas/tasksmanager.schema";
+import { TaskItem, TaskList } from "./schemas/tasksmanager.schema";
 
 export interface TasksManagementRepository {
-	createTaskforUser(
-		taskId: mongoose.Types.ObjectId,
-		userId: mongoose.Types.ObjectId,
+	createTaskItem(
+		title: string,
+		context: string,
 		status: string
 	): Promise<string>;
 
-	getTaskListbyUserId(
-		userId: mongoose.Types.ObjectId
-	): Promise<TasksManagement[]>;
+	getTaskListbyUserId(userId: mongoose.Types.ObjectId): Promise<TaskList[]>;
+
+	getAllTask(page: number): Promise<TaskList[]>;
+
+	updateStatus(_id: mongoose.Types.ObjectId, status: string): Promise<string>;
+
+	findTask(_id: mongoose.Types.ObjectId): Promise<TaskItem[]>;
 
 	setTaskforUser(
 		_id: mongoose.Types.ObjectId,
-		status: string
-	): Promise<string>;
-
-	getAllTask(page: number): Promise<TasksManagement[]>;
-
-	checkDBDuplicate(
-		taskId: mongoose.Types.ObjectId,
 		userId: mongoose.Types.ObjectId
-	): Promise<boolean>;
+	): Promise<string>;
 }

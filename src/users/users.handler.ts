@@ -93,8 +93,9 @@ export class UsersHandler implements UserRepository {
 	}
 
 	public async verifyToken(token: string): Promise<JwtPayload | string> {
-		const decoded = verify(token, process.env.SECRET_KEY);
-		return decoded;
+		const verifyToken = verify(token, process.env.SECRET_KEY);
+
+		return verifyToken;
 	}
 
 	public async getAllUser(): Promise<User[]> {
